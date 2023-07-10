@@ -12,6 +12,7 @@ func main() {
 	psql := storage.NewPostgresql("localhost", "moritz", "postgres", "web", 5432)
 
 	server := api.NewAPIServer(":3000", psql)
+
 	fmt.Println("Listening on Port 3000")
 	server.Init()
 }

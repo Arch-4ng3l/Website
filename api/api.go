@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Arch-4ng3l/Website/frontend"
 	"github.com/Arch-4ng3l/Website/storage"
 	"github.com/Arch-4ng3l/Website/types"
 )
@@ -27,9 +28,11 @@ func NewAPIServer(listeningAddr string, storage storage.Storage) *APIServer {
 
 func (s *APIServer) Init() {
 
-	http.HandleFunc("/login", s.handleLogin)
+	http.HandleFunc("/loginAcc", s.handleLogin)
 
-	http.HandleFunc("/signup", s.handleAccountCreate)
+	http.HandleFunc("/signupAcc", s.handleAccountCreate)
+
+	frontend.NewFrontend().Init()
 
 	http.ListenAndServe(s.listeningAddr, nil)
 
@@ -45,6 +48,7 @@ func (s *APIServer) handleAccountCreate(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(400)
 		return
 	}
+
 	hash := sha256.New()
 	hash.Write([]byte(acc.Password))
 
@@ -74,16 +78,22 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	fmt.Println(body)
+	var user struct {
+		Name string `json:"user_name"`
+		Pw   string `json:"password"`
+	}
+	json.Unmarshal([]byte(body), &user)
 
-	acc, err := s.storage.FetchUserData(body, "")
+	acc, err := s.storage.FetchUserData(user.Name, user.Pw)
 
 	if err != nil {
 		log.Fatal(err)
 		w.WriteHeader(404)
 		return
 	}
-
+	w.WriteHeader(200)
 	encode := json.NewEncoder(w)
 	encode.Encode(acc)
+	fmt.Println(acc)
+
 }
