@@ -18,13 +18,10 @@
 			<label for="password">password</label>
 			<input type="password" name="password" required>
 			
-			<button type=submit> login</button>
+			<button type=submit> Sign Up </button>
 			
 
 		</form>
-
-
-
 
 
 		<script>
@@ -40,17 +37,12 @@
 				};
 
 				var xhr = new XMLHttpRequest();
-				xhr.open('POST', '/loginAcc');
+				xhr.open('POST', '/signupAcc');
 				xhr.setRequestHeader('Content-Type', 'application/json');
-				xhr.onload = function() {
-					if (xhr.status === 200) {
-						var response = json.parse(xhr.responseText);
-						console.log(response); // handle the response as needed
-					}
-				};
+				xhr.onload = function() {};
 				xhr.send(JSON.stringify(requestdata));
 			});
-
-</script>
+	</script>
+	
 	</body>
 </html>

@@ -49,8 +49,9 @@ func (psql *postgresql) CreateNewUser(acc *types.Account) error {
 						VALUES($1, $2, $3);`
 
 	name, password, bal := acc.Name, acc.Password, acc.Balance
+
 	fmt.Println(name + password)
-	fmt.Println(bal)
+
 	res, err := psql.DB.Exec(query, name, password, bal)
 
 	if err != nil {
@@ -58,6 +59,7 @@ func (psql *postgresql) CreateNewUser(acc *types.Account) error {
 		return err
 
 	}
+	fmt.Println(res.RowsAffected())
 
 	n, err := res.RowsAffected()
 
@@ -71,23 +73,28 @@ func (psql *postgresql) CreateNewUser(acc *types.Account) error {
 
 func (psql *postgresql) FetchUserData(name, pw string) (*types.Account, error) {
 
-	query := `SELECT * FROM "users" WHERE "user_name"=$1 VALUES($1)`
+	query := `SELECT * FROM "users" WHERE user_name=$1 LIMIT 1`
 
 	rows, err := psql.DB.Query(query, name)
 
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil, nil
 	}
-
-	var id uint
-	var user_name string
+	var id int
+	var userName string
 	var password string
 	var balance float64
 
-	rows.Scan(&id, &user_name, &password, &balance)
+	if !rows.Next() {
+		fmt.Println("ERR")
+		return nil, nil
+	}
+	err = rows.Scan(&id, &userName, &password, &balance)
+	fmt.Println(userName, password)
 	acc := types.NewAccount(name, password, balance)
-
 	if acc.Validate(pw) {
+		fmt.Println("AUTH RIGHT")
 		return acc, nil
 	}
 

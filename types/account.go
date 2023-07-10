@@ -1,6 +1,10 @@
 package types
 
-import "crypto/sha256"
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+)
 
 type Account struct {
 	Name     string  `json:"user_name"`
@@ -19,9 +23,11 @@ func NewAccount(name, password string, bal float64) *Account {
 func (a *Account) Validate(password string) bool {
 
 	hash := sha256.New()
-	hash.Write([]byte(password))
+	pw := hex.EncodeToString(hash.Sum([]byte(password)))
+	fmt.Println("1 " + pw)
 
-	if string(hash.Sum(nil)) == a.Password {
+	fmt.Println("2 " + a.Password)
+	if pw == a.Password {
 
 		return true
 

@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -40,9 +39,13 @@ func (s *APIServer) Init() {
 
 func (s *APIServer) handleAccountCreate(w http.ResponseWriter, r *http.Request) {
 
-	acc := &types.Account{}
+	var user struct {
+		Name string `json:"user_name"`
+		Pw   string `json:"password"`
+	}
 
-	err := json.NewDecoder(r.Body).Decode(acc)
+	acc := &types.Account{}
+	err := json.NewDecoder(r.Body).Decode(&user)
 
 	if err != nil {
 		w.WriteHeader(400)
@@ -50,19 +53,14 @@ func (s *APIServer) handleAccountCreate(w http.ResponseWriter, r *http.Request) 
 	}
 
 	hash := sha256.New()
-	hash.Write([]byte(acc.Password))
 
-	acc.Password = hex.EncodeToString(hash.Sum(nil))
+	acc.Name = user.Name
+	acc.Password = hex.EncodeToString(hash.Sum([]byte(user.Pw)))
+	acc.Balance = 0
 
-	fmt.Println(acc)
 	err = s.storage.CreateNewUser(acc)
 
-	if err != nil {
-		w.WriteHeader(400)
-		return
-	}
-
-	w.WriteHeader(201)
+	w.WriteHeader(200)
 	return
 }
 
@@ -72,7 +70,9 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(405)
 		return
 	}
+
 	temp, err := ioutil.ReadAll(r.Body)
+
 	body := string(temp)
 	if err != nil {
 		log.Fatal(err)
@@ -82,6 +82,7 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) {
 		Name string `json:"user_name"`
 		Pw   string `json:"password"`
 	}
+
 	json.Unmarshal([]byte(body), &user)
 
 	acc, err := s.storage.FetchUserData(user.Name, user.Pw)
@@ -91,9 +92,14 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
 		return
 	}
-	w.WriteHeader(200)
+
+	if acc == nil {
+		w.WriteHeader(400)
+		return
+	}
+
+	http.Redirect(w, r, "/", 300)
+
 	encode := json.NewEncoder(w)
 	encode.Encode(acc)
-	fmt.Println(acc)
-
 }
