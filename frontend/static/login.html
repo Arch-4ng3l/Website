@@ -6,6 +6,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
     <title>hello world</title>
+		<script src=main.js></script>
   </head>
   <body>
 
@@ -13,44 +14,17 @@
 		<form id="send">
 
 			<label for="user_name">username</label>
+
 			<input type="text" name="user_name" required>
 		
 			<label for="password">password</label>
+
 			<input type="password" name="password" required>
-			
-			<button type=submit> login</button>
+
+			<input type="button" onclick="send('/loginAcc')" value="Login"></input>
 			
 
 		</form>
 
-
-
-
-
-		<script>
-			document.getElementById('send').addEventListener('submit', function(event) {
-				event.preventDefault(); // prevent the default form submission
-
-				var username = document.getElementsByName('user_name')[0].value;
-				var password = document.getElementsByName('password')[0].value;
-
-				var requestdata = {
-					user_name: username,
-					password: password
-				};
-
-				var xhr = new XMLHttpRequest();
-				xhr.open('POST', '/loginAcc');
-				xhr.setRequestHeader('Content-Type', 'application/json');
-				xhr.onload = function() {
-					if (xhr.status === 200) {
-						var response = json.parse(xhr.responseText);
-						console.log(response); // handle the response as needed
-					}
-				};
-				xhr.send(JSON.stringify(requestdata));
-			});
-
-</script>
 	</body>
 </html>

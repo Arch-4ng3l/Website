@@ -98,7 +98,7 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/", 300)
+	http.Redirect(w, r, "/", 303)
 
 	encode := json.NewEncoder(w)
 	encode.Encode(acc)
